@@ -8,6 +8,16 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
 {
     public static class Seml
     {
+        public enum E
+        {
+            InvalidLine,
+            IndentNonTab,
+            IndentWrongIncrease,
+            ListItemMissing,
+            SemlValueInvalid,
+            QuoteUnclosed
+        }
+
         const int TAB = 4;
 
         /// <returns>
@@ -105,7 +115,7 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
                 }
 
                 // throw when a line is neither a key, nor a key-value-pair
-                throw new Exception($"Line {index + 1}: '{lines[index]}' is not valid.");
+                throw new Exception($"{E.InvalidLine}: Line {index + 1}: '{lines[index]}' is not valid.");
             }
 
             return (object)currentDict ?? currentList;
@@ -117,9 +127,9 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
             int lineIndent = origLine.TakeWhile(char.IsWhiteSpace).Count();
 
             if (lineIndent % TAB != 0)
-                throw new Exception($"Wrong indent on line {index + 1} - '{origLine}'. Indent was {lineIndent}, but must be a multiple of {TAB}");
+                throw new Exception($"{E.IndentNonTab}: Wrong indent on line {index + 1} - '{origLine}'. Indent was {lineIndent}, but must be a multiple of {TAB}");
             if (lineIndent > currentIndent)
-                throw new Exception($"Wrong indent on line {index + 1} - '{origLine}'. Increasing indent is only allowed by {TAB} and after a line that contains a key only (text ending with a ':'. Expected indent was {currentIndent} but was {lineIndent}.");
+                throw new Exception($"{E.IndentWrongIncrease}: Wrong indent on line {index + 1} - '{origLine}'. Increasing indent is only allowed by {TAB} and after a line that contains a key only (text ending with a ':'. Expected indent was {currentIndent} but was {lineIndent}.");
             
             skipLine = false;
             blockEnd = false;
@@ -187,7 +197,7 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
 
             if (string.IsNullOrEmpty(listItemLine))
             {
-                throw new Exception($"Line {index + 1}: List item indicator (-) without list item");
+                throw new Exception($"{E.ListItemMissing}: Line {index + 1}: List item indicator (-) without list item");
             }
 
             KeyValuePair<string, object> kvp;
@@ -227,7 +237,7 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
             if (double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out doubleValue)) return doubleValue;
             if (bool.TryParse(value, out boolValue)) return boolValue;
             
-            throw new Exception($"Line {index + 1}: {value} is not a valid SEML value.");
+            throw new Exception($"{E.SemlValueInvalid}: Line {index + 1}: {value} is not a valid SEML value.");
         }
 
         static string ParseMultiLineString(string value, ref int index, string[] lines)
@@ -248,7 +258,7 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
                 }
             }
 
-            throw new Exception($"Unclosed quote starting at line {firstLineIndex + 1}");
+            throw new Exception($"{E.QuoteUnclosed}: Unclosed quote starting at line {firstLineIndex + 1}");
         }
 
         static bool HasKeyValueColon(string line)

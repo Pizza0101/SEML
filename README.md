@@ -1,5 +1,5 @@
 # SEML
-Seml stands for "Seml Ein't a Markup Language".
+SEML stands for "SEML Ein't a Markup Language".
 
 It parses a highly simplified YAML-like syntax and is designed to handle complex configurations, i.e. from a block's CustomData.
 

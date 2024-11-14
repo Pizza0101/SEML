@@ -1,0 +1,80 @@
+using System.Collections.Generic;
+
+namespace SpaceEngineers.UWBlockPrograms.Seml
+{
+    public static class SemlHv
+    {
+        public static bool TryGetVector3(Dictionary<string, object> dict, string key, out VRageMath.Vector3 value, VRageMath.Vector3 defaultValue)
+        {
+            value = defaultValue;
+
+            if (dict == null)
+                return false;
+
+            object obj;
+            if (!dict.TryGetValue(key, out obj))
+                return false;
+
+            var vectorList = obj as List<object>;
+            if (vectorList != null)
+                return TryGetVector3(vectorList, out value, defaultValue);
+
+            var vectorDict = obj as Dictionary<string, object>;
+            if (vectorDict == null || vectorDict.Count != 3)
+                return false;
+
+            double x;
+            if (!SemlHc.TryGetDouble(vectorDict, "X", out x))
+                return false;
+            double y;
+            if (!SemlHc.TryGetDouble(vectorDict, "Y", out y))
+                return false;
+            double z;
+            if (!SemlHc.TryGetDouble(vectorDict, "Z", out z))
+                return false;
+
+            value = new VRageMath.Vector3(x, y, z);
+            return true;
+        }
+
+        static bool TryGetVector3(List<object> list, out VRageMath.Vector3 value, VRageMath.Vector3 defaultValue)
+        {
+            value = defaultValue;
+            
+            if (list == null || list.Count != 3)
+                return false;
+
+            double x;
+            if (!SemlHc.TryGetDouble(list[0], out x))
+                return false;
+            double y;
+            if (!SemlHc.TryGetDouble(list[1], out y))
+                return false;
+            double z;
+            if (!SemlHc.TryGetDouble(list[2], out z))
+                return false;
+
+            value = new VRageMath.Vector3(x, y, z);
+            return true;
+        }
+
+        public static VRageMath.Vector3 GetVector3(List<object> list, VRageMath.Vector3 defaultValue)
+        {
+            VRageMath.Vector3 value;
+            TryGetVector3(list, out value, defaultValue);
+            return value;
+        }
+
+        public static bool TryGetColor(Dictionary<string, object> dict, string key, out VRageMath.Color value, VRageMath.Color defaultValue)
+        {
+            value = defaultValue;
+            
+            VRageMath.Vector3 v3;
+            if (!TryGetVector3(dict, key, out v3, VRageMath.Vector3.Zero))
+                return false;
+
+            value = new VRageMath.Color((byte)v3.X, (byte)v3.Y, (byte)v3.Z);
+            return true;
+        }
+    }
+}

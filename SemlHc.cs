@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SpaceEngineers.UWBlockPrograms.Seml
 {
-    public static class SemlHC
+    public static class SemlHc
     {
         public static bool TryGetString(Dictionary<string, object> dict, string key, out string value, string defaultValue=null)
         {            

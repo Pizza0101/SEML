@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpaceEngineers.UWBlockPrograms.Seml
 {
-    public static class SemlHN
+    public static class SemlHn
     {
         public static bool TryGetFloat(Dictionary<string, object> dict, string key, out float value, float defaultValue = 0.0f)
         {
@@ -13,7 +13,7 @@ namespace SpaceEngineers.UWBlockPrograms.Seml
                 return false;
 
             double dval;
-            if (!SemlHC.TryGetDouble(dict, key, out dval, defaultValue))
+            if (!SemlHc.TryGetDouble(dict, key, out dval, defaultValue))
                 return false;
 
             value = (float)dval;
@@ -28,7 +28,7 @@ namespace SpaceEngineers.UWBlockPrograms.Seml
                 return false;
 
             double dval;
-            if (!SemlHC.TryGetDouble(dict, key, out dval, defaultValue))
+            if (!SemlHc.TryGetDouble(dict, key, out dval, defaultValue))
                 return false;
 
             value = (int)dval;

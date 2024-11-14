@@ -4,17 +4,17 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpaceEngineers.UWBlockPrograms.Misc
+namespace SpaceEngineers.UWBlockPrograms.Seml
 {
-    public static class Seml
+    public static class SemlReader
     {
         public enum E
         {
-            InvalidLine,
+            LineInvalid,
             IndentNonTab,
             IndentWrongIncrease,
             ListItemMissing,
-            SemlValueInvalid,
+            ValueInvalid,
             QuoteUnclosed
         }
 
@@ -37,6 +37,9 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
 
         public static object GetValue(Dictionary<string, object> data, params string[] keyPath)
         {
+            if (data == null || keyPath == null || keyPath.Length == 0)
+                return null;
+
             object current = data;
 
             foreach (var key in keyPath)
@@ -49,26 +52,6 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
             }
 
             return current;
-        }
-
-        public static double GetDouble(object value, double defaultValue = 0.0f)
-        {
-            double result;
-            TryGetDouble(value, out result, defaultValue);
-            return result;
-        }
-
-        public static bool TryGetDouble(object value, out double result, double defaultValue = 0.0)
-        {
-            var d = value as double?;
-            if (d.HasValue)
-            {
-                result = d.Value;
-                return true;
-            }
-
-            result = defaultValue;
-            return false;
         }
 
         static object Parse(string[] lines, ref int index, int indent)
@@ -115,7 +98,7 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
                 }
 
                 // throw when a line is neither a key, nor a key-value-pair
-                throw new Exception($"{E.InvalidLine}: Line {index + 1}: '{lines[index]}' is not valid.");
+                throw new Exception($"{E.LineInvalid}: Line {index + 1}: '{lines[index]}' is not valid.");
             }
 
             return (object)currentDict ?? currentList;
@@ -225,10 +208,20 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
                 return ParseMultiLineString(value, ref index, lines);
             }
 
+            return ParseSemlValueSingleLine(value, index);
+        }
+
+        static object ParseSemlValueSingleLine(string value, int index)
+        {
             // Single-line string enclosed in quotes
             if (value.StartsWith("\"") && value.EndsWith("\""))
             {
                 return value.Substring(1, value.Length - 2);
+            }
+
+            if (value.StartsWith("[") && value.EndsWith("]"))
+            {
+                return ParseInlineList(value, index);
             }
 
             // Other types: double, bool
@@ -237,7 +230,18 @@ namespace SpaceEngineers.UWBlockPrograms.Misc
             if (double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out doubleValue)) return doubleValue;
             if (bool.TryParse(value, out boolValue)) return boolValue;
             
-            throw new Exception($"{E.SemlValueInvalid}: Line {index + 1}: {value} is not a valid SEML value.");
+            throw new Exception($"{E.ValueInvalid}: Line {index + 1}: {value} is not a valid SEML value.");
+        }
+
+        static List<object> ParseInlineList(string inlineList, int index)
+        {
+            var split = inlineList.Trim('[', ']').Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            List<object> list = new List<object>();
+            foreach (var value in split)
+            {
+                list.Add(ParseSemlValueSingleLine(value.Trim(), index));
+            }
+            return list;
         }
 
         static string ParseMultiLineString(string value, ref int index, string[] lines)

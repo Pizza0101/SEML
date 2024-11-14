@@ -22,16 +22,13 @@ It parses a highly simplified YAML-like syntax and is designed to handle complex
 active: false
 defaults:
     font:
-        type: "monospace"
-        size: 5.8
+        type: "Monospace"
+        size: 2.8
         color:
             r: 255
             g: 128
             b: 0
-    background_color:
-        r: 0
-        g: 0
-        b: 0
+    background_color: [0, 0, 0]
 texts:
     - "This is the first text"
     - "This is another text"
